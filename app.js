@@ -16,7 +16,6 @@ var score = 0;
 var health = 3;
 
 
-
 var obstacleArray = []
 var displayedObjects = []
 
@@ -56,18 +55,32 @@ emptyHealth.src = "https://raw.githubusercontent.com/mikeplott/TOAdventure/maste
 
 
 var backgroundMusic = new Audio();
+backgroundMusic.src = "game-music.wav"
+backgroundMusic.loop = true;
 
 var playerJumpSound = new Audio();
+playerJumpSound.src = "jump.wav"
+
+var playerHurtSound = new Audio();
+playerHurtSound.src = "player-splat.wav"
 
 var playerSplatSound = new Audio();
+playerSplatSound.src = "player-splat.wav"
 
 var enemySound = new Audio();
+enemySound.src = "skull.wav"
 
 var moneySound = new Audio();
+moneySound.src = "coin.wav"
 
 var itemSound = new Audio();
+itemSound.src = "coin.wav"
 
 var gameOverSound = new Audio();
+gameOverSound.src = "gameover.wav"
+
+
+backgroundMusic.play()
 
 function draw() {
 
@@ -177,7 +190,9 @@ var endGame = function(){
   game.drawImage(gameEnd, 5,30,300,100)
   clearInterval(objectCycle);
   clearInterval(gameUpdate);
+  playerHurtSound.play()
   setTimeout(function(){
+     gameOverSound.play()
     y += -15;
     var fallingDeath = setInterval(function(){
 
@@ -194,6 +209,7 @@ var endGame = function(){
     if(y > ground){
       y = ground;
       yspeed = 0;
+      playerSplatSound.play()
       clearInterval(fallingDeath)
     }
 },45)
@@ -217,6 +233,8 @@ function startMove(event) {
   // pressed up
   if (event.keyCode == 38) {
     if (jumpCount < 2){
+      playerJumpSound.load()
+      playerJumpSound.play()
         yspeed = -10;
         jumpCount += 1;
         playerImage = playerJump;
@@ -261,11 +279,16 @@ var obstacle = function (O) {
     O.x += -3;
     O.y += 0;
 
-
+    if(O.x === 120){
+      if(O.name === "enemy"){
+         enemySound.play()
+      }
+   }
 
     if(O.x <= 0){
       score += 1;
       O.active = false
+
     } else {
       O.active = O.active
     }
@@ -280,19 +303,31 @@ var obstacle = function (O) {
 
 
 var objectThrowing = function(){
+   var itemTracks = [25,50,75,100,125]
   if(Date.now() > startTime){
-  var crntItem = obstacleArray[0]
+
    if(displayedObjects.length === 0){
     level += 1;
   }
 
-   displayedObjects.push(obstacle({
-     speed: -10,
-     name: crntItem.catName,
-     x: crntItem.x,
-     y: crntItem.y
-   }));
-  obstacleArray.splice(0,1)
+  var objAmount = (Math.floor(Math.random() * 3) + 1)
+  if (objAmount > obstacleArray.length){
+     objAmount = obstacleArray.length
+ }
+   for(var b = 0; b < objAmount; b++ ){
+      var crntIndex = (Math.floor(Math.random() * itemTracks.length))
+      var crntY = itemTracks[crntIndex]
+      var crntItem = obstacleArray[0]
+      displayedObjects.push(obstacle({
+        speed: -10,
+        name: crntItem.catName,
+        x: crntItem.x,
+        y: crntY
+      }));
+      itemTracks.splice(crntIndex, 1)
+     obstacleArray.splice(0,1)
+   }
+
   if(obstacleArray.length === 0){
 
     startTime = Date.now() + 10000
@@ -303,7 +338,7 @@ var objectThrowing = function(){
 
 }
 
-var objectCycle = setInterval(objectThrowing, 1000)
+var objectCycle = setInterval(objectThrowing, 900)
 
 var collision = function (item, me){
 
@@ -324,11 +359,15 @@ var handleCollisions = function (){
          score += -5;
          if(health > 0){
            health += -1;
+           playerHurtSound.play()
+
          }
       } else if (item.name === "item"){
+         itemSound.play()
          item.active = false
          score += 5;
       } else if (item.name === "money"){
+         moneySound.play()
          item.active = false
          score += 10;
       }
