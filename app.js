@@ -54,6 +54,21 @@ fullHealth.src = "https://raw.githubusercontent.com/mikeplott/TOAdventure/master
 var emptyHealth = new Image();
 emptyHealth.src = "https://raw.githubusercontent.com/mikeplott/TOAdventure/master/public/ui/empty-heart.png"
 
+
+var backgroundMusic = new Audio();
+
+var playerJumpSound = new Audio();
+
+var playerSplatSound = new Audio();
+
+var enemySound = new Audio();
+
+var moneySound = new Audio();
+
+var itemSound = new Audio();
+
+var gameOverSound = new Audio();
+
 function draw() {
 
 
@@ -76,6 +91,9 @@ function draw() {
     x = 0;
   }
 
+  if (y < ground){
+     playerImage = playerJump
+ }
 
   if (x > canvas.width - 30){
     x = canvas.width - 30;
@@ -110,12 +128,25 @@ function draw() {
     itemCount = itemCount + 5
     for (i = 0; i < itemCount ; i++){
       var theY = (Math.floor(Math.random() * 105) + 25)
+      var theY2 = (Math.floor(Math.random() * 105) + 25)
+      var theY3 = (Math.floor(Math.random() * 105) + 25)
       console.log(theY)
       obstacleArray.push({
-        name: 'item',
-        x: 900,
+        x: 901,
+        catName: "item",
         y: theY
-      })
+     },
+     {
+      catName: "money",
+      x: 902,
+      y: theY2
+   },
+   {
+     catName: "enemy",
+     x: 903,
+     y: theY3
+   }
+   )
     }
   }
 
@@ -165,11 +196,11 @@ var endGame = function(){
       yspeed = 0;
       clearInterval(fallingDeath)
     }
-  },30)
+},45)
 
 
 
-  }, 1000)
+  }, 800)
 }
 
 function startMove(event) {
@@ -196,9 +227,18 @@ function startMove(event) {
 
 
 var obstacle = function (O) {
+
    O.active = true;
-  O.item = new Image()
-    O.item.src = "https://raw.githubusercontent.com/mikeplott/TOAdventure/master/public/npcs/enemy1.png"
+   O.item = new Image()
+
+   if(O.name === 'money'){
+      O.item.src ="https://raw.githubusercontent.com/mikeplott/TOAdventure/master/public/money/money.png"
+   } else if (O.name === 'item'){
+      O.item.src ="https://raw.githubusercontent.com/mikeplott/TOAdventure/master/public/items/trident.png"
+   } else if (O.name === 'enemy'){
+      O.item.src = "https://raw.githubusercontent.com/mikeplott/TOAdventure/master/public/npcs/enemy1.png"
+   }
+
   O.xVelocity = 0;
   O.yVelocity = 0;
   O.width = 20;
@@ -248,6 +288,7 @@ var objectThrowing = function(){
 
    displayedObjects.push(obstacle({
      speed: -10,
+     name: crntItem.catName,
      x: crntItem.x,
      y: crntItem.y
    }));
@@ -278,11 +319,20 @@ var collision = function (item, me){
 var handleCollisions = function (){
   displayedObjects.forEach(function(item){
     if(collision(item)){
-      item.active = false
-      score += -5;
-      if(health > 0){
-        health += -1;
+      if(item.name === "enemy"){
+         item.active = false
+         score += -5;
+         if(health > 0){
+           health += -1;
+         }
+      } else if (item.name === "item"){
+         item.active = false
+         score += 5;
+      } else if (item.name === "money"){
+         item.active = false
+         score += 10;
       }
+
     }
   })
 }
