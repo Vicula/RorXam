@@ -8,11 +8,11 @@ body, html {
 }
 
 canvas {
-
+ margin-top: 70px;
  margin-left: 70px;
  margin-bottom: 0;
- height: 600px;
- width: 900px;
+ height: 80%;
+ width: 80%;
  background: rgb(15,15,15);
  border: 5px #fff solid;
 }
