@@ -62,7 +62,7 @@ var playerJumpSound = new Audio();
 playerJumpSound.src = "jump.wav"
 
 var playerHurtSound = new Audio();
-playerHurtSound.src = "player-splat.wav"
+playerHurtSound.src = "player-hurt.wav"
 
 var playerSplatSound = new Audio();
 playerSplatSound.src = "player-splat.wav"
@@ -74,7 +74,7 @@ var moneySound = new Audio();
 moneySound.src = "coin.wav"
 
 var itemSound = new Audio();
-itemSound.src = "coin.wav"
+itemSound.src = "pickup-item.wav"
 
 var gameOverSound = new Audio();
 gameOverSound.src = "gameover.wav"
@@ -140,25 +140,27 @@ function draw() {
 
     itemCount = itemCount + 5
     for (i = 0; i < itemCount ; i++){
-      var theY = (Math.floor(Math.random() * 105) + 25)
-      var theY2 = (Math.floor(Math.random() * 105) + 25)
-      var theY3 = (Math.floor(Math.random() * 105) + 25)
-      console.log(theY)
+
       obstacleArray.push({
-        x: 901,
+        x: 0,
         catName: "item",
-        y: theY
+        y: 0
      },
      {
       catName: "money",
-      x: 902,
-      y: theY2
+      x: 0,
+      y: 0
    },
    {
      catName: "enemy",
-     x: 903,
-     y: theY3
-   }
+     x: 0,
+     y: 0
+  }
+   // {
+   //   catName: "health",
+   //   x: 903,
+   //   y: theY3
+   // }
    )
     }
   }
@@ -186,12 +188,13 @@ function draw() {
 var gameUpdate = setInterval(draw, 20);
 
 var endGame = function(){
-
+   backgroundMusic.pause()
   game.drawImage(gameEnd, 5,30,300,100)
   clearInterval(objectCycle);
   clearInterval(gameUpdate);
   playerHurtSound.play()
   setTimeout(function(){
+     playerHurtSound.play()
      gameOverSound.play()
     y += -15;
     var fallingDeath = setInterval(function(){
@@ -255,6 +258,8 @@ var obstacle = function (O) {
       O.item.src ="https://raw.githubusercontent.com/mikeplott/TOAdventure/master/public/items/trident.png"
    } else if (O.name === 'enemy'){
       O.item.src = "https://raw.githubusercontent.com/mikeplott/TOAdventure/master/public/npcs/enemy1.png"
+   } else if (O.name === 'health'){
+      O.item.src = "https://raw.githubusercontent.com/mikeplott/TOAdventure/master/public/ui/full-heart.png"
    }
 
   O.xVelocity = 0;
@@ -304,6 +309,7 @@ var obstacle = function (O) {
 
 var objectThrowing = function(){
    var itemTracks = [25,50,75,100,125]
+   var xTracks = [900,920,950]
   if(Date.now() > startTime){
 
    if(displayedObjects.length === 0){
@@ -314,14 +320,17 @@ var objectThrowing = function(){
   if (objAmount > obstacleArray.length){
      objAmount = obstacleArray.length
  }
+
    for(var b = 0; b < objAmount; b++ ){
+      var crntXIndex = (Math.floor(Math.random() * xTracks.length))
       var crntIndex = (Math.floor(Math.random() * itemTracks.length))
       var crntY = itemTracks[crntIndex]
+      var crntX = xTracks[crntXIndex]
       var crntItem = obstacleArray[0]
       displayedObjects.push(obstacle({
         speed: -10,
         name: crntItem.catName,
-        x: crntItem.x,
+        x: crntX,
         y: crntY
       }));
       itemTracks.splice(crntIndex, 1)
@@ -370,6 +379,13 @@ var handleCollisions = function (){
          moneySound.play()
          item.active = false
          score += 10;
+      } else if (item.name === "health"){
+         item.active = false
+         itemSound.play()
+         health += 1;
+         if(health > 3){
+            health = 3;
+         }
       }
 
     }
